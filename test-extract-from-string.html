@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<div>
+			<br>
+			<input id="string" style="width: 90%;" value="新疆维吾尔自治区 哈密市 伊州区青年南路 545400 李大佑 15622181004 47890419990976456X">
+				
+			</input> <br> <br>
+
+			<button id="extract">Test</button> <br> <br>
+			<label for="province"> <input type="text" id="province"></label>
+			<label for="city"> <input type="text" id="city"></label>
+			<label for="street"> <input type="text" id="street"></label>
+			<label for="zipcode"> <input type="text" id="zipcode"></label>
+			<label for="name"> <input type="text" id="name"></label>
+			<label for="phone"> <input type="text" id="phone"></label>
+			<label for="id"> <input type="text" id="id"></label>
+
+		</div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script src="./province.js"></script>
+		<script>
+			const province = [];
+			$(document).ready( function(){
+				var str = $("#string").val();
+				console.log(str);
+				let ans = extract_from_str(str);
+			});
+			$("#extract").on('click', function(){
+				var str = $("#string").val();
+				let ans = extract_from_str(str);
+			});
+			function extract_from_str(rec_str){
+				let ppl_addr = [];
+			  let endof_addr = -1;
+				var str = rec_str.split(' ');
+				let single_str = "";
+				let cities = [];
+				for(let i =0;i<str.length;i++){
+					let flag = false;
+					single_str = str[i];
+					// alert(typeof ppl_addr);
+					// if single_str not start with number
+					if(!single_str.match(/^\d/)){
+						//check if it's address(province/city/street) or people name
+						if(!("province" in ppl_addr)){ // no province=>find province
+							provinces.forEach(element => {
+							if(single_str==element["provinceName"]){
+								ppl_addr["province"]=single_str;
+								flag = true;
+								cities = element["citys"];
+							}});
+						}
+						if(!ppl_addr.hasOwnProperty("city")&&!flag){ // no city=>find city
+							if(cities.length==0){
+								console.log("no pro, add all cities");
+								provinces.forEach(element => {
+									for(let m=0;m<element["citys"].length;m++){
+									 cities.push(element["citys"][m]);
+									}
+									// console.log("LLLL:  "+element["citys"].length);
+									// cities.push(element["citys"]);
+								});
+							}
+							// console.log(cities);
+							// console.log(single_str);
+              cities.forEach(element =>{
+								// console.log(element["citysName"]);
+								if(single_str==element["citysName"]){
+								  ppl_addr["city"] = single_str;
+								  flag = true;
+								}
+							})
+						}
+						if(!flag){
+							if(endof_addr<0){ // not found name yet
+								if(ppl_addr.hasOwnProperty("street")){
+									let street1 = ppl_addr["street"];
+									single_str = street1+single_str;
+								}
+							ppl_addr["street"] = single_str;
+							flag = true;
+						 }
+						  else{
+							  ppl_addr["name"] = single_str;
+								flag = true;
+						  }
+						}	
+					}else{ // parse string starts with number
+						endof_addr = endof_addr<0? i: endof_addr;
+						// console.log(single_str);
+						// console.log(single_str.length);
+						if(single_str.length<=6){
+							ppl_addr["zip_code"]= single_str;
+						}
+						else if(single_str.length<=11){
+							ppl_addr["phone"]= single_str;
+						}
+						else{
+							ppl_addr["id_number"] = single_str;
+						}
+					}
+				}
+				$("#province").val(ppl_addr["province"]);
+				$("#city").val(ppl_addr["city"]);
+				$("#street").val(ppl_addr["street"]);
+				$("#zipcode").val(ppl_addr["zip_code"]);
+				$("#name").val(ppl_addr["name"]);
+				$("#phone").val(ppl_addr["phone"]);
+				$("#id").val(ppl_addr["id_number"]);
+				console.log(ppl_addr);
+
+				return ppl_addr; // empty???
+				
+			}
+		</script>
+	</body>
+</html>
